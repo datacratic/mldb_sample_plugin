@@ -6,6 +6,7 @@
 
 #include "mldb/soa/types/value_description.h"
 #include "mldb/server/function.h"
+#include "mldb/server/plugin.h"
 
 using namespace Datacratic;
 using namespace Datacratic::MLDB;
@@ -68,8 +69,37 @@ struct HelloWorldFunction: public MLDB::Function {
     }
 };
 
-// Put this declaration in "file scope" so it doesn't clash with other
-// plugin initializations.
+/// Create the plugin itself.  In our case, we only want the plugin as a
+/// way to load up the HelloWorld function, so we don't add any
+/// functionality over the base class.
+
+struct SamplePlugin: public MLDB::Plugin {
+
+    SamplePlugin(MldbServer * server)
+        : MLDB::Plugin(server)
+    {
+    }
+    
+    /// Override the getStatus method to return a custom method
+    Any getStatus() const
+    {
+        return std::string("SamplePlugin is loaded");
+    }
+};
+
+extern "C" {
+
+/// This is the function that MLDB will call to initialize the plugin.
+/// It needs to return a newly created plugin.
+MLDB::Plugin * mldbPluginEnter(MldbServer * server)
+{
+    return new SamplePlugin(server);
+}
+
+} // extern C
+
+/// Put this declaration in "file scope" so it doesn't clash with other
+/// plugin initializations.
 namespace {
 
 /// Register our function with MLDB.  We say here that our function
