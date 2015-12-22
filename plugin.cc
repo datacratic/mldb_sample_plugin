@@ -114,11 +114,4 @@ regHelloWorldFunction(package,
                       "helloWorld",
                       "Sample function that always returns hello = \"world\"",
                       "No documentation available");
-#if 0
-regHelloWorldFunction("hello.world",
-                      "Sample function that always returns hello = \"world\"",
-                      "No documentation available");
-#endif
-
-
 } // file scope
