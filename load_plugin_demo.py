@@ -20,7 +20,7 @@ assert res['statusCode'] == 404, str(res)
 perform('PUT', '/v1/plugins/sample', [], {
     'type' : 'sharedLibrary',
     'params' : {
-        'address' : '/home/fmlheureux/workspace/mldb/build/x86_64/lib/',
+        'address' : 'build/x86_64/lib/',
         'library' : 'libmldb_sample_plugin.so',
         'apiVersion' : '1.0.0',
         'allowInsecureLoading' : True
