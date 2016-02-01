@@ -4,9 +4,10 @@
    Copyright (c) 2015 Datacratic Inc.  All rights reserved.
  */
 
-#include "mldb/soa/types/value_description.h"
-#include "mldb/server/function.h"
-#include "mldb/server/plugin.h"
+#include "mldb/types/value_description.h"
+#include "mldb/core/function.h"
+#include "mldb/core/plugin.h"
+#include "mldb/rest/poly_entity.h"
 
 using namespace Datacratic;
 using namespace Datacratic::MLDB;
@@ -103,13 +104,14 @@ MLDB::Plugin * mldbPluginEnter(MldbServer * server)
 namespace {
 
 /// Register our function with MLDB.  We say here that our function
-/// hello.world takes an integer for configuration (which is ignored),
+/// helloWorld takes an integer for configuration (which is ignored),
 /// has the given description and has no documentation available.
 
+Package package("mldb_sample_plugin");
+
 static RegisterFunctionType<HelloWorldFunction, int>
-regHelloWorldFunction("hello.world",
-                    "Sample function that always returns hello = \"world\"",
-                    "No documentation available");
-
-
+regHelloWorldFunction(package,
+                      "helloWorld",
+                      "Sample function that always returns hello = \"world\"",
+                      "No documentation available");
 } // file scope
