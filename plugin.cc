@@ -1,6 +1,7 @@
 /* sample_plugin.cc
 
    Jeremy Barnes, 11 September 2015
+   Mich, 2016-12-14
    Copyright (c) 2015 Datacratic Inc.  All rights reserved.
  */
 
@@ -9,8 +10,7 @@
 #include "mldb/core/plugin.h"
 #include "mldb/rest/poly_entity.h"
 
-using namespace Datacratic;
-using namespace Datacratic::MLDB;
+using namespace MLDB;
 using namespace std;
 
 /// We are defining a new Function here, so we need to derive from
@@ -43,8 +43,15 @@ struct HelloWorldFunction: public MLDB::Function {
     /// what we return.
     virtual FunctionInfo getFunctionInfo() const
     {
+        vector<KnownColumn> cols;
+        cols.emplace_back(PathElement("world"),
+                          make_shared<Utf8StringValueInfo>(),
+                          COLUMN_IS_DENSE);
+
         FunctionInfo result;
-        result.output.addValue("hello", std::make_shared<MLDB::StringValueInfo>());
+        result.output = std::make_shared<RowValueInfo>(cols, SCHEMA_CLOSED);
+        cols.clear();
+        result.input.emplace_back(new RowValueInfo(cols, SCHEMA_CLOSED));
         return result;
     }
 
@@ -52,21 +59,14 @@ struct HelloWorldFunction: public MLDB::Function {
     /// function itself, and the context gives us the input arguments.
     /// Since we don't do anything complicated or read the input, neither
     /// argument is used.
-    virtual FunctionOutput apply(const FunctionApplier & applier,
-                                 const FunctionContext & context) const
+    virtual ExpressionValue apply(const FunctionApplier & applier,
+                                  const ExpressionValue & context) const
     {
-        // Holds our result.
-        FunctionOutput result;
-
         // Create the string "world" as of the current timestamp.  In MLDB,
         // every data point has an associated timestamp at which it's known.
         ExpressionValue world("world", Date::now());
 
-        // Set the value of the "hello" column to our string
-        result.set("hello", world);
-
-
-        return result;
+        return world;
     }
 };
 
