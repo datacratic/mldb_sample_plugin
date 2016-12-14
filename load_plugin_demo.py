@@ -4,20 +4,21 @@
 # This file is part of MLDB. Copyright 2015 Datacratic. All rights reserved.
 #
 
-if False:
-    mldb = None
-
-def perform(*args, **kwargs):
-    res = mldb.perform(*args, **kwargs)
-    assert res['statusCode'] in [200, 201], str(res)
-    return res
+mldb = mldb_wrapper.wrap(mldb)  # noqa
 
 hello_world_url = '/v1/types/functions/helloWorld'
 
-res = mldb.perform('GET', hello_world_url)
-assert res['statusCode'] == 404, str(res)
+# the plugin doesn't exist
+try:
+    mldb.get(hello_world_url)
+except mldb_wrapper.ResponseException as exc:  # noqa
+    assert exc.response.status_code == 404
+else:
+    assert False, "should not be here"
+#assert res['statusCode'] == 404, str(res)
 
-perform('PUT', '/v1/plugins/sample', [], {
+# have MLDB load it
+mldb.put('/v1/plugins/sample', {
     'type' : 'sharedLibrary',
     'params' : {
         'address' : 'build/x86_64/lib/',
@@ -28,4 +29,12 @@ perform('PUT', '/v1/plugins/sample', [], {
 })
 
 # now it exists
-mldb.log(perform('GET', hello_world_url))
+mldb.log(mldb.get(hello_world_url))
+
+# let's make use of it
+mldb.put('/v1/functions/hello', {
+    'type' : 'helloWorld'
+})
+mldb.log(mldb.query("SELECT hello({})"))
+
+mldb.script.set_return("success")
